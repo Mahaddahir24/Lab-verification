@@ -159,7 +159,7 @@ export default function App() {
   useEffect(() => {
     const handleBeforePrint = () => {
       if (activeReport) {
-        document.title = `${activeReport.name.trim().toUpperCase().replace(/\s+/g, " ")}.pdf`
+        document.title = `${activeReport.name.trim().toUpperCase().replace(/\s+/g, " ")}`;
       }
     };
     const handleAfterPrint = () => {
@@ -176,7 +176,7 @@ export default function App() {
   const handlePrint = () => {
     const originalTitle = document.title;
     if (activeReport) {
-      document.title = q, "_")}_Lab_Report`;
+      document.title = `${activeReport.name.trim().toUpperCase().replace(/\s+/g, " ")}`;
     }
     window.print();
     setTimeout(() => {
@@ -190,7 +190,7 @@ export default function App() {
 
     setIsExporting(true);
 
-    const filename = `${activeReport.name.trim().toUpperCase().replace(/\s+/g, " ")}.pdf`
+    const filename = `${activeReport.name.trim().toUpperCase().replace(/\s+/g, " ")}.pdf`;
 
     // 1. Create a unique clone of our report sheet
     const clone = element.cloneNode(true) as HTMLElement;
@@ -415,7 +415,7 @@ export default function App() {
           {/* SEARCH & QUICK VERIFY CARD */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold uppercase tracking-wider">
-              <span>💼</span>
+              <span>ðŸ’¼</span>
               <span>Search Passport</span>
             </div>
             
@@ -480,7 +480,7 @@ export default function App() {
                         </div>
                         <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
                           <span>ID: {r.id}</span>
-                          <span>•</span>
+                          <span>â€¢</span>
                           <span>Passport: {r.passportNo}</span>
                         </div>
                       </div>
@@ -526,7 +526,7 @@ export default function App() {
                 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 text-[#2563eb] hover:bg-slate-50 transition-colors text-xs font-semibold rounded-lg shadow-sm cursor-pointer"
               >
-                <span>📋</span>
+                <span>ðŸ“‹</span>
                 <span>Copy Link</span>
               </button>
             </div>
@@ -552,7 +552,7 @@ export default function App() {
                       }}
                       title="Copy Base URL"
                     >
-                      📋
+                      ðŸ“‹
                     </span>
                   </div>
                 </div>
@@ -678,7 +678,7 @@ export default function App() {
           {/* ADVISORY FOOTNOTE */}
           <div className="text-xs text-slate-500 leading-snug px-2 flex flex-col md:flex-row items-start md:items-center justify-between border-t border-slate-200/60 pt-4 mt-2 gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-sm shrink-0">🛡️</span>
+              <span className="text-sm shrink-0">ðŸ›¡ï¸</span>
               <span>Security checkpoints are located next to Dahabshiil Bank in Mogadishu.</span>
             </div>
             <div className="shrink-0 text-[11px]">
@@ -718,7 +718,7 @@ export default function App() {
                   >
                     {/* diagonal red banner watermark */}
                     <div className="absolute transform -rotate-25 bg-red-600/15 border-y-4 border-red-500/40 text-red-600/70 py-4 px-12 text-center select-none w-[120%] font-black tracking-widest text-[22px] md:text-[36px] uppercase">
-                      INVALID DOCUMENT • DIGNIIN REPORT FAUX
+                      INVALID DOCUMENT â€¢ DIGNIIN REPORT FAUX
                     </div>
                   </motion.div>
                 )}
@@ -1138,7 +1138,7 @@ export default function App() {
                       >
                         {/* diagonal red banner watermark */}
                         <div className="absolute transform -rotate-25 bg-red-600/15 border-y-4 border-red-500/40 text-red-600/70 py-4 px-12 text-center select-none w-[120%] font-black tracking-widest text-[22px] md:text-[36px] uppercase">
-                          INVALID DOCUMENT • DIGNIIN REPORT FAUX
+                          INVALID DOCUMENT â€¢ DIGNIIN REPORT FAUX
                         </div>
                       </motion.div>
                     )}
@@ -1157,7 +1157,7 @@ export default function App() {
                       <div>
                         <div className="lab-name">MEDILAB DIEGNOSTIC</div>
                         <div className="lab-address">Address: AdenAdde InternationalAirport,NextTo Dahabshiil Bank, Waberi, Mogadishu-Somalia</div>
-                        <div className="lab-tel">Tel: +252 613523011 • Email: m.labsdiagnostic@gmail.com</div>
+                        <div className="lab-tel">Tel: +252 613523011 â€¢ Email: m.labsdiagnostic@gmail.com</div>
                       </div>
                     </div>
                     <div className="meta-info">
@@ -1170,7 +1170,7 @@ export default function App() {
                   {/* DYNAMIC INTEGRITY ALERT WARNING */}
                   {!isCurrentlyVerified && (
                     <div style={{ marginBottom: "15px", padding: "10px", background: "#fdf2f2", borderLeft: "4px solid #f05252", borderRadius: "4px", color: "#9b1c1c", fontSize: "12px", textAlign: "left" }}>
-                      <strong style={{ display: "block", textTransform: "uppercase", marginBottom: "2px" }}>⚠️ INVALID DOCUMENT / SYSTEM COUBNTERFEIT WARNING</strong>
+                      <strong style={{ display: "block", textTransform: "uppercase", marginBottom: "2px" }}>âš ï¸ INVALID DOCUMENT / SYSTEM COUBNTERFEIT WARNING</strong>
                       This report has been marked as suspended or simulated and does not match central health registry logs.
                     </div>
                   )}
@@ -1330,7 +1330,7 @@ export default function App() {
       {/* FOOTER ADVISORY BANNER - NO-PRINT */}
       <footer className="no-print mt-auto bg-slate-950 border-t border-slate-800 py-4 text-center text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p>© 2026 Medilab Diagnostic Center. Designed & Verified by Daryeel Tech IT Team.</p>
+          <p>Â© 2026 Medilab Diagnostic Center. Designed & Verified by Daryeel Tech IT Team.</p>
           <div className="flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
             <span className="font-mono text-[11px] text-slate-500">
