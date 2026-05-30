@@ -159,7 +159,7 @@ export default function App() {
   useEffect(() => {
     const handleBeforePrint = () => {
       if (activeReport) {
-        document.title = `${activeReport.name.replace(/\s+/g, "_")}_Lab_Report`;
+        document.title = `${activeReport.firstName.trim().toUpperCase()} ${activeReport.lastName.trim().toUpperCase()}.pdf`
       }
     };
     const handleAfterPrint = () => {
