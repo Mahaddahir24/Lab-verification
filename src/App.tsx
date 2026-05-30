@@ -25,7 +25,9 @@ import {
   Sparkles,
   FileDown,
   MapPin,
-  ChevronRight
+  ChevronRight,
+  Edit2,
+  Trash2
 } from "lucide-react";
 import { PatientReport, LabTest } from "./types";
 import { INITIAL_REPORTS } from "./data";
@@ -72,6 +74,27 @@ export default function App() {
     phone: "",
     doctor: "sadam adan Ahmed",
     resultDate: new Date().toISOString().split("T")[0],
+    hcv: "Negative",
+    hepB: "Negative",
+    hiv: "Negative",
+    tpha: "Negative"
+  });
+
+  // Editing state
+  const [editingReport, setEditingReport] = useState<PatientReport | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editPatientForm, setEditPatientForm] = useState({
+    id: "",
+    boono: "",
+    name: "",
+    age: 35,
+    gender: "Male" as "Male" | "Female" | "Other",
+    company: "",
+    passportNo: "",
+    phone: "",
+    doctor: "sadam adan Ahmed",
+    resultDate: "",
+    verified: true,
     hcv: "Negative",
     hepB: "Negative",
     hiv: "Negative",
@@ -335,6 +358,98 @@ export default function App() {
     return found ? found.result : "Negative";
   };
 
+  const handleStartEdit = (report: PatientReport) => {
+    const hcv = getTestResultVal(report, "HCV");
+    const hepB = getTestResultVal(report, "Hepatitis B");
+    const hiv = getTestResultVal(report, "HIV");
+    const tpha = getTestResultVal(report, "TPHA");
+
+    setEditingReport(report);
+    setEditPatientForm({
+      id: report.id,
+      boono: report.boono || report.id,
+      name: report.name,
+      age: report.age,
+      gender: report.gender,
+      company: report.company,
+      passportNo: report.passportNo,
+      phone: report.phone || "",
+      doctor: report.doctor || "sadam adan Ahmed",
+      resultDate: report.resultDate,
+      verified: report.verified !== false,
+      hcv: hcv,
+      hepB: hepB,
+      hiv: hiv,
+      tpha: tpha
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditReportSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingReport) return;
+    if (!editPatientForm.id || !editPatientForm.name) {
+      alert("Fadlan qor lambarka boortada iyo magaca (Please write Patient ID and Name)");
+      return;
+    }
+
+    // Check duplicate ID (if edited to a new one that isn't the original one)
+    if (editPatientForm.id !== editingReport.id && reports.some((r) => r.id === editPatientForm.id)) {
+      alert("Lambarka ID-ga ee bukaanka mar hore ayaa la isticmaalay! (This Patient ID already exists!)");
+      return;
+    }
+
+    const updatedReports = reports.map((r) => {
+      if (r.id === editingReport.id) {
+        return {
+          ...r,
+          id: editPatientForm.id,
+          boono: editPatientForm.boono.trim() || editPatientForm.id,
+          name: editPatientForm.name.toUpperCase(),
+          age: Number(editPatientForm.age),
+          gender: editPatientForm.gender,
+          company: editPatientForm.company.toUpperCase() || "PRIVATE CO",
+          passportNo: editPatientForm.passportNo.toUpperCase() || "N/A",
+          phone: editPatientForm.phone || "N/A",
+          doctor: editPatientForm.doctor,
+          resultDate: editPatientForm.resultDate,
+          verified: editPatientForm.verified,
+          tests: [
+            { name: "HCV", result: editPatientForm.hcv as any, unit: "test" },
+            { name: "Hepatitis B Surface Antigen", result: editPatientForm.hepB as any, unit: "test" },
+            { name: "HIV Test", result: editPatientForm.hiv as any, unit: "test" },
+            { name: "TPHA", result: editPatientForm.tpha as any, unit: "test" }
+          ]
+        };
+      }
+      return r;
+    });
+
+    setReports(updatedReports);
+    
+    if (selectedReportId === editingReport.id) {
+      setSelectedReportId(editPatientForm.id);
+    }
+    
+    setShowEditModal(false);
+    setEditingReport(null);
+  };
+
+  const handleDeleteReport = (id: string, name: string) => {
+    if (confirm(`Ma hubtaa inaad tirtirto bukaanka: ${name}? (Are you sure you want to delete patient: ${name}?)`)) {
+      const remaining = reports.filter((r) => r.id !== id);
+      setReports(remaining);
+      if (selectedReportId === id) {
+        if (remaining.length > 0) {
+          setSelectedReportId(remaining[0].id);
+          updateUrlParam(remaining[0]);
+        } else {
+          setSelectedReportId("");
+        }
+      }
+    }
+  };
+
   // Generate dynamic QR code URL based on production host URL in Serverless HTML mode
   const hcvVal = activeReport ? getTestResultVal(activeReport, "HCV") : "Negative";
   const hepBVal = activeReport ? getTestResultVal(activeReport, "Hepatitis B") : "Negative";
@@ -461,12 +576,12 @@ export default function App() {
                 const colors = getAvatarColors(r.name);
                 
                 return (
-                  <button
+                  <div
                     key={r.id}
                     onClick={() => handleSelectReport(r.id)}
-                    className={`text-left p-4 rounded-xl border transition-all flex items-center justify-between ${
+                    className={`text-left p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
                       isCurReport
-                        ? "bg-white border-blue-505 shadow-md ring-1 ring-blue-500"
+                        ? "bg-white border-blue-500 shadow-md ring-1 ring-blue-500"
                         : "bg-white border-[#e2e8f0] hover:bg-slate-50 shadow-sm"
                     }`}
                   >
@@ -486,7 +601,7 @@ export default function App() {
                       </div>
                     </div>
                     
-                    <div className="shrink-0 flex items-center gap-3">
+                    <div className="shrink-0 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       {isVerified ? (
                         <div className="flex items-center gap-1.5 bg-[#ecfdf5] text-[#10b981] text-xs px-2.5 py-1 rounded-full border border-[#a7f3d0] font-bold">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span>
@@ -498,9 +613,32 @@ export default function App() {
                           <span>Suspended</span>
                         </div>
                       )}
-                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                      
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStartEdit(r);
+                        }}
+                        className="p-1.5 hover:bg-blue-50 hover:text-blue-600 text-slate-405 rounded-lg transition-colors border border-transparent hover:border-blue-200 flex items-center justify-center cursor-pointer"
+                        title="Edit Patient"
+                      >
+                        <Edit2 className="w-3.5 h-3.5 text-slate-500 hover:text-blue-600" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteReport(r.id, r.name);
+                        }}
+                        className="p-1.5 hover:bg-rose-50 hover:text-rose-600 text-slate-405 rounded-lg transition-colors border border-transparent hover:border-rose-200 flex items-center justify-center cursor-pointer"
+                        title="Delete Patient"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-slate-500 hover:text-rose-600" />
+                      </button>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
               {filteredReports.length === 0 && (
@@ -1243,7 +1381,7 @@ export default function App() {
                         const isNegative = test.result === "Negative" || test.result === "Non-Reactive";
                         return (
                           <tr key={idx}>
-                            <td style={{ fontWeight: "600" }}>{test.name}</td>
+                            <td style={{ fontWeight: "400" }}>{test.name}</td>
                             <td style={{ fontWeight: "400" }}>
                               {isCurrentlyVerified ? test.result : "REJECTED"}
                             </td>
@@ -1614,6 +1752,289 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* EDIT REPORT MODAL */}
+      <AnimatePresence>
+        {showEditModal && editingReport && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowEditModal(false);
+                setEditingReport(null);
+              }}
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+            />
+
+            {/* Modal Body */}
+            <motion.div
+              initial={{ scale: 0.95, y: 15, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, y: 15, opacity: 0 }}
+              className="relative bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto"
+            >
+              
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-500/20 text-blue-400 rounded-lg">
+                    <Edit2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-white text-base">
+                      Edit Clearance Registration
+                    </h3>
+                    <p className="text-xs text-slate-400">Modify medical logs on local memory database</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingReport(null);
+                  }}
+                  className="p-1 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleEditReportSubmit} className="flex flex-col gap-4 text-sm">
+                
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      Patient ID (Lambarka)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 2042"
+                      value={editPatientForm.id}
+                      onChange={(e) => setEditPatientForm((prev) => ({ ...prev, id: e.target.value.trim() }))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      Boono #
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 2026"
+                      value={editPatientForm.boono}
+                      onChange={(e) => setEditPatientForm((prev) => ({ ...prev, boono: e.target.value.trim() }))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      Passport No
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. FS879183"
+                      value={editPatientForm.passportNo}
+                      onChange={(e) => setEditPatientForm((prev) => ({ ...prev, passportNo: e.target.value }))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                    Full Patient Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. OLEKSANDR PETRENKO"
+                    value={editPatientForm.name}
+                    onChange={(e) => setEditPatientForm((prev) => ({ ...prev, name: e.target.value }))}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      Age
+                    </label>
+                    <input
+                      type="number"
+                      value={editPatientForm.age}
+                      onChange={(e) => setEditPatientForm((prev) => ({ ...prev, age: Number(e.target.value) }))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      Gender
+                    </label>
+                    <select
+                      value={editPatientForm.gender}
+                      onChange={(e) => setEditPatientForm((prev) => ({ ...prev, gender: e.target.value as any }))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      Company / Organization
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. TURKISH AIRLINES"
+                      value={editPatientForm.company}
+                      onChange={(e) => setEditPatientForm((prev) => ({ ...prev, company: e.target.value }))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      Phone Number
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 839180"
+                      value={editPatientForm.phone}
+                      onChange={(e) => setEditPatientForm((prev) => ({ ...prev, phone: e.target.value }))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      Doctor Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editPatientForm.doctor}
+                      onChange={(e) => setEditPatientForm((prev) => ({ ...prev, doctor: e.target.value }))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      Result Release Date
+                    </label>
+                    <input
+                      type="date"
+                      value={editPatientForm.resultDate}
+                      onChange={(e) => setEditPatientForm((prev) => ({ ...prev, resultDate: e.target.value }))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Immunology Panel Results Selection */}
+                <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80 mt-2">
+                  <span className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1">
+                    <Layers className="w-3.5 h-3.5 text-blue-400" /> Bio-Assay Results Matrix
+                  </span>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-400 uppercase mb-1">
+                        HCV Status
+                      </label>
+                      <select
+                        value={editPatientForm.hcv}
+                        onChange={(e) => setEditPatientForm((prev) => ({ ...prev, hcv: e.target.value }))}
+                        className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-xs text-white"
+                      >
+                        <option value="Negative">Negative</option>
+                        <option value="Positive">Positive</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-400 uppercase mb-1">
+                        Hep B Surface Ag
+                      </label>
+                      <select
+                        value={editPatientForm.hepB}
+                        onChange={(e) => setEditPatientForm((prev) => ({ ...prev, hepB: e.target.value }))}
+                        className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-xs text-white"
+                      >
+                        <option value="Negative">Negative</option>
+                        <option value="Positive">Positive</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-400 uppercase mb-1">
+                        HIV Test Status
+                      </label>
+                      <select
+                        value={editPatientForm.hiv}
+                        onChange={(e) => setEditPatientForm((prev) => ({ ...prev, hiv: e.target.value }))}
+                        className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-xs text-white"
+                      >
+                        <option value="Negative">Negative</option>
+                        <option value="Positive">Positive</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-400 uppercase mb-1">
+                        TPHA Syphilis
+                      </label>
+                      <select
+                        value={editPatientForm.tpha}
+                        onChange={(e) => setEditPatientForm((prev) => ({ ...prev, tpha: e.target.value }))}
+                        className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-xs text-white"
+                      >
+                        <option value="Negative">Negative</option>
+                        <option value="Positive">Positive</option>
+                        <option value="Non-Reactive">Non-Reactive</option>
+                        <option value="Reactive">Reactive</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-800/80 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setEditingReport(null);
+                    }}
+                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-xl text-xs transition-colors cursor-pointer"
+                  >
+                    Ka laabo (Cancel)
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-5 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 shadow-md shadow-blue-500/10 cursor-pointer"
+                  >
+                    <Check className="w-3.5 h-3.5" /> Keydi (Save Changes)
+                  </button>
+                </div>
+
+              </form>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
-}
+                            }
