@@ -159,7 +159,7 @@ export default function App() {
   useEffect(() => {
     const handleBeforePrint = () => {
       if (activeReport) {
-        document.title = `${activeReport.firstName.trim().toUpperCase()} ${activeReport.lastName.trim().toUpperCase()}.pdf`
+        document.title = `${activeReport.name.trim().toUpperCase().replace(/\s+/g, " ")}.pdf`
       }
     };
     const handleAfterPrint = () => {
@@ -176,7 +176,7 @@ export default function App() {
   const handlePrint = () => {
     const originalTitle = document.title;
     if (activeReport) {
-      document.title = `${activeReport.name.replace(/\s+/g, "_")}_Lab_Report`;
+      document.title = q, "_")}_Lab_Report`;
     }
     window.print();
     setTimeout(() => {
@@ -190,7 +190,7 @@ export default function App() {
 
     setIsExporting(true);
 
-    const filename = `${activeReport.name.trim().replace(/\s+/g, "_")}_Lab_Report.pdf`;
+    const filename = `${activeReport.name.trim().toUpperCase().replace(/\s+/g, " ")}.pdf`
 
     // 1. Create a unique clone of our report sheet
     const clone = element.cloneNode(true) as HTMLElement;
