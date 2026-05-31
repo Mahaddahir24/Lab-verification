@@ -243,20 +243,20 @@ export default function App() {
     clone.style.background = "#ffffff";
 
     const opt = {
-      margin: 0, // Margins are controlled via the @page rule
-      filename: filename,
-      image: { type: "jpeg", quality: 1 }, // High quality
-      html2canvas: { 
+      margin:       0, // Zero margin fits built-in 35px padding edge-to-edge beautifully
+      filename:     filename,
+      image:        { type: "jpeg", quality: 0.98 },
+      html2canvas:  { 
         scale: 2, 
         useCORS: true, 
+        logging: false,
         letterRendering: true,
-        windowWidth: 800 // Forces consistent render width
+        allowTaint: true,
+        windowWidth: 800, // Forces html2canvas to render the clone in simulated 800px width
+        scrollX: 0,
+        scrollY: 0
       },
-      jsPDF: { 
-        unit: "mm", 
-        format: "a4", 
-        orientation: "portrait" 
-      }
+      jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" }
     };
 
     const exporter = (html2pdf as any).default || html2pdf;
@@ -569,7 +569,7 @@ export default function App() {
           {/* SEARCH & QUICK VERIFY CARD */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold uppercase tracking-wider">
-              <Stethoscope className="w-4 h-4 text-slate-500 shrink-0" />
+              <span>ðŸ§‘â€âš•ï¸</span>
               <span>Search Patients</span>
             </div>
             
@@ -644,7 +644,7 @@ export default function App() {
                         </div>
                         <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
                           <span>ID: {r.id}</span>
-                          <span className="text-slate-300">-</span>
+                          <span>â€¢</span>
                           <span>Passport: {r.passportNo}</span>
                         </div>
                       </div>
@@ -696,19 +696,53 @@ export default function App() {
                 </div>
               )}
             </div>
-
-            {/* View Report Indicator below the patient list */}
-            <div className="text-center py-2 mt-4">
-              <span className="text-xs font-extrabold text-slate-500 uppercase tracking-widest bg-slate-100 border border-slate-200/60 px-4 py-2.5 rounded-xl inline-flex items-center gap-2 shadow-sm">
-                <Eye className="w-3.5 h-3.5 text-[#2563eb]" />
-                View Report
-              </span>
-            </div>
           </div>
 
 
 
+          {/* ACTION & INTEGRITY DEBUNG CONTROL */}
+          <div className="bg-white p-5 rounded-2xl border border-[#e2e8f0] flex flex-col gap-4 shadow-sm">
+            <h2 className="text-sm font-extrabold text-slate-800 tracking-wide uppercase flex items-center gap-2 font-display">
+              <ShieldCheck className="w-5 h-5 text-emerald-500" /> Verification Control
+            </h2>
+            
+            <div className="flex flex-col gap-4">
+              {/* Row 1: Integrity Status */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-xs font-bold text-slate-700">
+                  Integrity System Status
+                </span>
+                <span className={`text-[11px] px-3 py-1 rounded-full font-extrabold font-mono border ${
+                  isCurrentlyVerified 
+                    ? "bg-[#ecfdf5] text-[#10b981] border-[#a7f3d0]" 
+                    : "bg-rose-50 text-rose-600 border-rose-200"
+                }`}>
+                  {isCurrentlyVerified ? "Legitimate" : "Suspended"}
+                </span>
+              </div>
 
+              {/* Row 2: Report Status toggler */}
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">Report Status</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isCurrentlyVerified}
+                    onChange={(e) => {
+                      if (activeReport) {
+                        setVerificationOverride((prev) => ({
+                          ...prev,
+                          [activeReport.id]: e.target.checked
+                        }));
+                      }
+                    }}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+              </div>
+            </div>
+          </div>
 
         </section>
 
@@ -740,7 +774,7 @@ export default function App() {
                   >
                     {/* diagonal red banner watermark */}
                     <div className="absolute transform -rotate-25 bg-red-600/15 border-y-4 border-red-500/40 text-red-600/70 py-4 px-12 text-center select-none w-[120%] font-black tracking-widest text-[22px] md:text-[36px] uppercase">
-                      INVALID DOCUMENT - DIGNIIN REPORT FAUX
+                      INVALID DOCUMENT â€¢ DIGNIIN REPORT FAUX
                     </div>
                   </motion.div>
                 )}
@@ -865,7 +899,7 @@ export default function App() {
                     margin-bottom: 0;
                   }
                   .container-sheet .label {
-                    width: 110px;
+                    width: 130px;
                     color: #4b5563;
                     font-weight: 500;
                     flex-shrink: 0;
@@ -978,28 +1012,171 @@ export default function App() {
                   /* Media print query for high contrast, absolute high fidelity, and A4 precision */
                   @media print {
                     @page {
-                      /* Define exact A4 size */
-                      size: 210mm 297mm;
-                      margin: 10mm; /* Printer-safe margin */
+                      size: A4 portrait;
+                      margin: 10mm 12mm !important;
                     }
-
-                    /* Force the target container to fill the A4 page */
-                    #laboratory-report-sheet {
-                      display: block !important;
+                    * {
+                      -webkit-print-color-adjust: exact !important;
+                      print-color-adjust: exact !important;
+                    }
+                    body, html {
+                      background: #fff !important;
+                      color: #000000 !important;
                       width: 100% !important;
-                      max-width: 100% !important;
-                      margin: 0 !important;
-                      padding: 0 !important;
-                      box-shadow: none !important;
-                      border: none !important;
-                      /* Ensure no breaks occur inside the card */
-                      break-inside: avoid;
-                      page-break-inside: avoid;
+                      height: auto !important;
                     }
-
-                    /* Hide UI elements */
-                    .no-print {
-                      display: none !important;
+                    /* Ensure parents do not affect print sizing */
+                    #medilab-system-root, 
+                    main, 
+                    #report-view-canvas, 
+                    #report-view-canvas > div, 
+                    .print-container, 
+                    .medilab-sheet {
+                      background: transparent !important;
+                      background-color: transparent !important;
+                      padding: 0 !important;
+                      margin: 0 !important;
+                      border: none !important;
+                      box-shadow: none !important;
+                      max-width: 100% !important;
+                      width: 100% !important;
+                      min-height: auto !important;
+                      display: block !important;
+                      position: static !important;
+                    }
+                    .container-sheet {
+                      display: block !important;
+                      width: 800px !important;
+                      max-width: 800px !important;
+                      min-height: auto !important;
+                      padding: 35px 35px !important;
+                      margin: 0 auto !important;
+                      border: none !important;
+                      border-radius: 0 !important;
+                      box-shadow: none !important;
+                      background: #fff !important;
+                      color: #000000 !important;
+                      box-sizing: border-box !important;
+                      page-break-inside: avoid !important;
+                      break-inside: avoid !important;
+                    }
+                    .container-sheet .header {
+                      border-bottom: 2px solid #e2e8f0 !important;
+                    }
+                    .container-sheet .label {
+                      color: #4b5563 !important;
+                      font-weight: 500 !important;
+                    }
+                    .container-sheet .value {
+                      color: #000000 !important;
+                      font-weight: 700 !important;
+                    }
+                    .container-sheet .box {
+                      border: 1px solid #e2e8f0 !important;
+                      background: #fff !important;
+                      padding: 16px 20px !important;
+                      border-radius: 12px !important;
+                    }
+                    .container-sheet .box h3 {
+                      color: #155a79 !important;
+                      font-weight: 400 !important;
+                      border-bottom: none !important;
+                    }
+                    .container-sheet .section-title {
+                      color: #155a79 !important;
+                      font-weight: 700 !important;
+                    }
+                    .container-sheet .results-table {
+                      margin-bottom: 25px !important;
+                    }
+                    .container-sheet .results-table th {
+                      color: #155a79 !important;
+                      border-bottom: 1.5px solid #cbd5e1 !important;
+                      font-weight: 400 !important;
+                    }
+                    .container-sheet .results-table td {
+                      border-bottom: 1px solid #f1f5f9 !important;
+                      color: #000000 !important;
+                      font-weight: 400 !important;
+                    }
+                    .container-sheet .results-table tr.category td {
+                      color: #155a79 !important;
+                      font-weight: 400 !important;
+                    }
+                    .container-sheet .sig-section {
+                      margin-top: 25px !important;
+                      padding-top: 20px !important;
+                      border-top: 1.5px dashed #cbd5e1 !important;
+                    }
+                    .container-sheet .sig-box {
+                      color: #374151 !important;
+                    }
+                    .container-sheet .footer {
+                      margin-top: 25px !important;
+                      padding-top: 12px !important;
+                      border-top: 1.5px solid #e2e8f0 !important;
+                      color: #4b5563 !important;
+                      display: flex !important;
+                      justify-content: space-between !important;
+                      align-items: center !important;
+                    }
+                    .container-sheet .footer-credit {
+                      display: inline-block !important;
+                      vertical-align: middle !important;
+                      white-space: nowrap !important;
+                    }
+                    .container-sheet .footer-credit-logo {
+                      border: 1px dashed #cbd5e1 !important;
+                      width: 18px !important;
+                      height: 18px !important;
+                      font-size: 8px !important;
+                      font-weight: 700 !important;
+                      border-radius: 3px !important;
+                      background: #fff !important;
+                      color: #4b5563 !important;
+                      display: inline-block !important;
+                      vertical-align: middle !important;
+                      text-align: center !important;
+                      line-height: 16px !important;
+                      box-sizing: border-box !important;
+                      margin-right: 6px !important;
+                      padding: 0 !important;
+                      position: relative !important;
+                      top: 1.5px !important;
+                    }
+                    .container-sheet .footer-credit-text {
+                      font-size: 11px !important;
+                      color: #4b5563 !important;
+                      display: inline-block !important;
+                      vertical-align: middle !important;
+                      line-height: 18px !important;
+                    }
+                    .container-sheet .qr-section {
+                      margin-top: 25px !important;
+                    }
+                    .container-sheet .qr-section img {
+                      width: 80px !important;
+                      height: 80px !important;
+                    }
+                    .container-sheet .meta-row {
+                      margin-bottom: 4px !important;
+                      white-space: nowrap !important;
+                      display: block !important;
+                    }
+                    .container-sheet .meta-label,
+                    .container-sheet .meta-value {
+                      display: inline-block !important;
+                      vertical-align: middle !important;
+                      line-height: 1.2 !important;
+                    }
+                    .container-sheet .meta-label {
+                      font-weight: 700 !important;
+                      color: #0f172a !important;
+                      margin-right: 4px !important;
+                    }
+                    .container-sheet .meta-value {
+                      font-weight: 400 !important;
+                      color: #1e293b !important;
                     }
                   }
                 `}} />
@@ -1017,7 +1194,7 @@ export default function App() {
                       >
                         {/* diagonal red banner watermark */}
                         <div className="absolute transform -rotate-25 bg-red-600/15 border-y-4 border-red-500/40 text-red-600/70 py-4 px-12 text-center select-none w-[120%] font-black tracking-widest text-[22px] md:text-[36px] uppercase">
-                          INVALID DOCUMENT - DIGNIIN REPORT FAUX
+                          INVALID DOCUMENT â€¢ DIGNIIN REPORT FAUX
                         </div>
                       </motion.div>
                     )}
@@ -1036,7 +1213,7 @@ export default function App() {
                       <div>
                         <div className="lab-name">MEDILAB DIEGNOSTIC</div>
                         <div className="lab-address">Address: AdenAdde InternationalAirport,NextTo Dahabshiil Bank, Waberi, Mogadishu-Somalia</div>
-                        <div className="lab-tel">Tel: +252 613523011 | Email: m.labsdiagnostic@gmail.com</div>
+                        <div className="lab-tel">Tel: +252 613523011 â€¢ Email: m.labsdiagnostic@gmail.com</div>
                       </div>
                     </div>
                     <div className="meta-info">
@@ -1229,7 +1406,7 @@ export default function App() {
                     <div className="w-[70%] h-[3px] bg-[#1b9bc5] mx-auto mb-2.5 rounded"></div>
                     <div className="text-slate-700 text-xs md:text-sm leading-relaxed font-normal">
                       <strong>Address:</strong> Aden Adde International Airport, Next To Dahabshiil Bank, Waberi, Mogadishu-Somalia<br />
-                      <strong>Tel:</strong> +252 613523011 &nbsp;&nbsp;&bull;&nbsp;&nbsp; <strong>Email:</strong> m.labsdiagnostic@gmail.com
+                      <strong>Tel:</strong> +252 613523011 &nbsp;&nbsp;â€¢&nbsp;&nbsp; <strong>Email:</strong> m.labsdiagnostic@gmail.com
                     </div>
                   </div>
                   <img 
@@ -1430,7 +1607,7 @@ export default function App() {
 
                 {/* Footer Section */}
                 <div className="border-t-[3px] border-[#1b84d6] pt-4 pb-2 text-center text-xs text-slate-500 font-semibold leading-relaxed">
-                  Â© 2026 Medilab Diagnostic Center - All rights reserved.<br />
+                  Â© 2026 Medilab Diagnostic Center â€” All rights reserved.<br />
                   Designed & Verified by Daryeel Tech IT Team
                 </div>
 
@@ -1475,9 +1652,9 @@ export default function App() {
       </main>
 
       {/* FOOTER ADVISORY BANNER - NO-PRINT */}
-      <footer style={{ backgroundColor: '#f4f5f2' }} className="no-print mt-auto border-t border-slate-300 py-4 text-center text-xs text-slate-700">
+      <footer className="no-print mt-auto bg-slate-950 border-t border-slate-800 py-4 text-center text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p>Â© 2026 Lab Verification Center. Designed & Verified by Tech IT Team.</p>
+          <p>Â© 2026 Medilab Diagnostic Center. Designed & Verified by Daryeel Tech IT Team.</p>
         </div>
       </footer>
 
@@ -1500,35 +1677,34 @@ export default function App() {
               initial={{ scale: 0.95, y: 15, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 15, opacity: 0 }}
-              style={{ backgroundColor: '#f4f5f2' }}
-              className="relative border border-slate-300 rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto"
+              className="relative bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto"
             >
               
-              <div className="flex items-center justify-between pb-3 border-b border-slate-300 mb-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-emerald-500/10 text-emerald-600 rounded-lg">
+                  <div className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg">
                     <Plus className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-display font-bold text-slate-900 text-base">
+                    <h3 className="font-display font-bold text-white text-base">
                       New Clearance Registration
                     </h3>
-                    <p className="text-xs text-slate-500">Add medical logs onto local memory database</p>
+                    <p className="text-xs text-slate-400">Add medical logs onto local memory database</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="p-1 hover:bg-slate-200 rounded-full text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateReportSubmit} className="flex flex-col gap-4 text-sm text-slate-800">
+              <form onSubmit={handleCreateReportSubmit} className="flex flex-col gap-4 text-sm">
                 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                       Patient ID (Lambarka)
                     </label>
                     <input
@@ -1537,12 +1713,12 @@ export default function App() {
                       placeholder="e.g. 2042"
                       value={newPatient.id}
                       onChange={(e) => setNewPatient((prev) => ({ ...prev, id: e.target.value.trim() }))}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                       Boono #
                     </label>
                     <input
@@ -1551,12 +1727,12 @@ export default function App() {
                       placeholder="e.g. 2026"
                       value={newPatient.boono}
                       onChange={(e) => setNewPatient((prev) => ({ ...prev, boono: e.target.value.trim() }))}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                       Passport No
                     </label>
                     <input
@@ -1564,13 +1740,13 @@ export default function App() {
                       placeholder="e.g. FS879183"
                       value={newPatient.passportNo}
                       onChange={(e) => setNewPatient((prev) => ({ ...prev, passportNo: e.target.value }))}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                     Full Patient Name
                   </label>
                   <input
@@ -1579,31 +1755,31 @@ export default function App() {
                     placeholder="e.g. OLEKSANDR PETRENKO"
                     value={newPatient.name}
                     onChange={(e) => setNewPatient((prev) => ({ ...prev, name: e.target.value }))}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase font-bold"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                       Age
                     </label>
                     <input
                       type="number"
                       value={newPatient.age}
                       onChange={(e) => setNewPatient((prev) => ({ ...prev, age: Number(e.target.value) }))}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                       Gender
                     </label>
                     <select
                       value={newPatient.gender}
                       onChange={(e) => setNewPatient((prev) => ({ ...prev, gender: e.target.value as any }))}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     >
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -1614,7 +1790,7 @@ export default function App() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                       Company / Organization
                     </label>
                     <input
@@ -1622,12 +1798,12 @@ export default function App() {
                       placeholder="e.g. TURKISH AIRLINES"
                       value={newPatient.company}
                       onChange={(e) => setNewPatient((prev) => ({ ...prev, company: e.target.value }))}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                       Phone Number
                     </label>
                     <input
@@ -1635,52 +1811,52 @@ export default function App() {
                       placeholder="e.g. 839180"
                       value={newPatient.phone}
                       onChange={(e) => setNewPatient((prev) => ({ ...prev, phone: e.target.value }))}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white placeholder:text-slate-650 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                       Doctor Name
                     </label>
                     <input
                       type="text"
                       value={newPatient.doctor}
                       onChange={(e) => setNewPatient((prev) => ({ ...prev, doctor: e.target.value }))}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                       Result Release Date
                     </label>
                     <input
                       type="date"
                       value={newPatient.resultDate}
                       onChange={(e) => setNewPatient((prev) => ({ ...prev, resultDate: e.target.value }))}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
                     />
                   </div>
                 </div>
 
                 {/* Immunology Panel Results Selection */}
-                <div className="bg-white p-3.5 rounded-xl border border-slate-300 mt-2">
-                  <span className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1">
-                    <Layers className="w-3.5 h-3.5 text-emerald-600" /> Bio-Assay Results Matrix
+                <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80 mt-2">
+                  <span className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1">
+                    <Layers className="w-3.5 h-3.5 text-blue-400" /> Bio-Assay Results Matrix
                   </span>
                   
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">
+                      <label className="block text-[11px] font-semibold text-slate-400 uppercase mb-1">
                         HCV Status
                       </label>
                       <select
                         value={newPatient.hcv}
                         onChange={(e) => setNewPatient((prev) => ({ ...prev, hcv: e.target.value }))}
-                        className="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-800"
+                        className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-xs text-white"
                       >
                         <option value="Negative">Negative</option>
                         <option value="Positive">Positive</option>
@@ -1688,13 +1864,13 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">
+                      <label className="block text-[11px] font-semibold text-slate-400 uppercase mb-1">
                         Hep B Surface Ag
                       </label>
                       <select
                         value={newPatient.hepB}
                         onChange={(e) => setNewPatient((prev) => ({ ...prev, hepB: e.target.value }))}
-                        className="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-800"
+                        className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-xs text-white"
                       >
                         <option value="Negative">Negative</option>
                         <option value="Positive">Positive</option>
@@ -1702,13 +1878,13 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">
+                      <label className="block text-[11px] font-semibold text-slate-400 uppercase mb-1">
                         HIV Test Status
                       </label>
                       <select
                         value={newPatient.hiv}
                         onChange={(e) => setNewPatient((prev) => ({ ...prev, hiv: e.target.value }))}
-                        className="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-800"
+                        className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-xs text-white"
                       >
                         <option value="Negative">Negative</option>
                         <option value="Positive">Positive</option>
@@ -1716,13 +1892,13 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">
+                      <label className="block text-[11px] font-semibold text-slate-400 uppercase mb-1">
                         TPHA Syphilis
                       </label>
                       <select
                         value={newPatient.tpha}
                         onChange={(e) => setNewPatient((prev) => ({ ...prev, tpha: e.target.value }))}
-                        className="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-800"
+                        className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-xs text-white"
                       >
                         <option value="Negative">Negative</option>
                         <option value="Positive">Positive</option>
@@ -1733,11 +1909,11 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-3 border-t border-slate-300 mt-2">
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-800/80 mt-2">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-xl text-xs transition-colors cursor-pointer"
+                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-xl text-xs transition-colors cursor-pointer"
                   >
                     Ka laabo (Cancel)
                   </button>
@@ -2041,4 +2217,4 @@ export default function App() {
 
     </div>
   );
-                        }
+                          }
