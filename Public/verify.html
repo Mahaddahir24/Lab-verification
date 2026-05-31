@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=900"> 
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=900">
   <title>Lab Verification</title>
 
   <style>
@@ -45,7 +45,7 @@
         <div class="line"></div>
         <div class="info">
           <b>Address:</b> Aden Adde International Airport, Next To Dahabshiil Bank, Waberi, Mogadishu-Somalia<br>
-          <b>Tel:</b> +252 613523011 &nbsp;&nbsp;•&nbsp;&nbsp;
+          <b>Tel:</b> +252 613523011 &nbsp;&nbsp;&bull;&nbsp;&nbsp;
           <b>Email:</b> m.labsdiagnostic@gmail.com
         </div>
       </div>
@@ -56,12 +56,12 @@
       <div class="success">✅ Patient waa sax wuxuuna ka yimid Medilab Diagnostic System</div>
       <div class="verified">✔ This report is authentic and verified by Medilab Diagnostic.</div>
       <div class="details">
-        <b>Patient ID:</b> <span id="p-id" class="edit-field" contenteditable="true">1876</span><br>
-        <b>Patient Name:</b> <span id="p-name" class="edit-field" contenteditable="true">MYKOLA VORONA</span><br>
-        <b>Age:</b> <span id="p-age" class="edit-field" contenteditable="true">44</span> | <b>Gender:</b> <span id="p-gender" class="edit-field" contenteditable="true">Male</span><br>
-        <b>Company:</b> <span id="p-company" class="edit-field" contenteditable="true">UKRANIAN HELICOPTERS</span> | <b>Passport No:</b> <span id="p-passport" class="edit-field" contenteditable="true">FS879183</span><br>
-        <b>Phone:</b> <span id="p-phone" class="edit-field" contenteditable="true">839180</span> | <b>Doctor:</b> <span id="p-doctor" class="edit-field" contenteditable="true">sadam adan Ahmed</span><br>
-        <b>Result Date:</b> <span id="p-date" class="edit-field" contenteditable="true">2026-05-24</span>
+        <b>Patient ID:</b> <span id="p-id" class="edit-field" contenteditable="false">1876</span><br>
+        <b>Patient Name:</b> <span id="p-name" class="edit-field" contenteditable="false">MYKOLA VORONA</span><br>
+        <b>Age:</b> <span id="p-age" class="edit-field" contenteditable="false">44</span> | <b>Gender:</b> <span id="p-gender" class="edit-field" contenteditable="false">Male</span><br>
+        <b>Company:</b> <span id="p-company" class="edit-field" contenteditable="false">UKRANIAN HELICOPTERS</span> | <b>Passport No:</b> <span id="p-passport" class="edit-field" contenteditable="false">FS879183</span><br>
+        <b>Phone:</b> <span id="p-phone" class="edit-field" contenteditable="false">839180</span> | <b>Doctor:</b> <span id="p-doctor" class="edit-field" contenteditable="false">sadam adan Ahmed</span><br>
+        <b>Result Date:</b> <span id="p-date" class="edit-field" contenteditable="false">2026-05-24</span>
       </div>
     </div>
 
@@ -69,15 +69,15 @@
     <table>
       <thead><tr><th>Test</th><th>Result</th><th>Unit</th><th>Remark</th></tr></thead>
       <tbody>
-        <tr><td>HCV</td><td id="val-hcv" class="edit-field" contenteditable="true">Negative</td><td>test</td><td></td></tr>
-        <tr><td>Hepatitis B Surface Antigen</td><td id="val-hepb" class="edit-field" contenteditable="true">Negative</td><td>test</td><td></td></tr>
-        <tr><td>HIV Test</td><td id="val-hiv" class="edit-field" contenteditable="true">Negative</td><td>test</td><td></td></tr>
-        <tr><td>TPHA</td><td id="val-tpha" class="edit-field" contenteditable="true">Negative</td><td>test</td><td></td></tr>
+        <tr><td>HCV</td><td id="val-hcv" class="edit-field" contenteditable="false">Negative</td><td>test</td><td></td></tr>
+        <tr><td>Hepatitis B Surface Antigen</td><td id="val-hepb" class="edit-field" contenteditable="false">Negative</td><td>test</td><td></td></tr>
+        <tr><td>HIV Test</td><td id="val-hiv" class="edit-field" contenteditable="false">Negative</td><td>test</td><td></td></tr>
+        <tr><td>TPHA</td><td id="val-tpha" class="edit-field" contenteditable="false">Negative</td><td>test</td><td></td></tr>
       </tbody>
     </table>
 
     <div class="footer-line">
-      © 2026 Medilab Diagnostic Center — All rights reserved.<br>
+      © 2026 Medilab Diagnostic Center - All rights reserved.<br>
       Designed & Verified by Daryeel Tech IT Team
     </div>
   </div>
@@ -107,21 +107,8 @@
         const paramName = fieldMapping[id];
         const paramVal = params.get(paramName);
         if (paramVal && paramVal !== "undefined" && paramVal !== "null") {
-          el.innerHTML = decodeURIComponent(paramVal);
-        } else {
-          // Fallback to localStorage if any saved data
-          const savedData = localStorage.getItem('patient_field_' + id);
-          if (savedData) {
-            el.innerHTML = savedData;
-          } else if (id.startsWith('val-')) {
-            el.innerHTML = "Negative";
-          }
+          el.innerText = decodeURIComponent(paramVal);
         }
-
-        // Save on input so manual user edits persist locally as requested
-        el.addEventListener('input', () => {
-          localStorage.setItem('patient_field_' + id, el.innerHTML);
-        });
       }
     });
   </script>
