@@ -1229,7 +1229,7 @@ export default function App() {
                     <div className="w-[70%] h-[3px] bg-[#1b9bc5] mx-auto mb-2.5 rounded"></div>
                     <div className="text-slate-700 text-xs md:text-sm leading-relaxed font-normal">
                       <strong>Address:</strong> Aden Adde International Airport, Next To Dahabshiil Bank, Waberi, Mogadishu-Somalia<br />
-                      <strong>Tel:</strong> +252 613523011 &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Email:</strong> m.labsdiagnostic@gmail.com
+                      <strong>Tel:</strong> +252 613523011 &nbsp;&nbsp;&bull;&nbsp;&nbsp; <strong>Email:</strong> m.labsdiagnostic@gmail.com
                     </div>
                   </div>
                   <img 
@@ -2041,4 +2041,4 @@ export default function App() {
 
     </div>
   );
-              }
+                        }
