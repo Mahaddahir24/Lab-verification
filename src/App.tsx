@@ -569,7 +569,7 @@ export default function App() {
           {/* SEARCH & QUICK VERIFY CARD */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold uppercase tracking-wider">
-              <span>🧑‍⚕️</span>
+              <span>ðŸ§‘â€âš•ï¸</span>
               <span>Search Patients</span>
             </div>
             
@@ -644,7 +644,7 @@ export default function App() {
                         </div>
                         <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
                           <span>ID: {r.id}</span>
-                          <span>•</span>
+                          <span>â€¢</span>
                           <span>Passport: {r.passportNo}</span>
                         </div>
                       </div>
@@ -740,7 +740,7 @@ export default function App() {
                   >
                     {/* diagonal red banner watermark */}
                     <div className="absolute transform -rotate-25 bg-red-600/15 border-y-4 border-red-500/40 text-red-600/70 py-4 px-12 text-center select-none w-[120%] font-black tracking-widest text-[22px] md:text-[36px] uppercase">
-                      INVALID DOCUMENT • DIGNIIN REPORT FAUX
+                      INVALID DOCUMENT â€¢ DIGNIIN REPORT FAUX
                     </div>
                   </motion.div>
                 )}
@@ -1010,10 +1010,25 @@ export default function App() {
                       display: block !important;
                       position: static !important;
                     }
+                    /* Explicitly suppress any no-print items even if they are child divs */
+                    #report-view-canvas > div.no-print,
+                    .no-print,
+                    .no-print * {
+                      display: none !important;
+                      height: 0 !important;
+                      min-height: 0 !important;
+                      max-height: 0 !important;
+                      padding: 0 !important;
+                      margin: 0 !important;
+                      border: none !important;
+                      overflow: hidden !important;
+                      opacity: 0 !important;
+                      visibility: hidden !important;
+                    }
                     .container-sheet {
                       display: block !important;
-                      width: 800px !important;
-                      max-width: 800px !important;
+                      width: 100% !important;
+                      max-width: 100% !important;
                       min-height: auto !important;
                       padding: 35px 35px !important;
                       margin: 0 auto !important;
@@ -1160,7 +1175,7 @@ export default function App() {
                       >
                         {/* diagonal red banner watermark */}
                         <div className="absolute transform -rotate-25 bg-red-600/15 border-y-4 border-red-500/40 text-red-600/70 py-4 px-12 text-center select-none w-[120%] font-black tracking-widest text-[22px] md:text-[36px] uppercase">
-                          INVALID DOCUMENT • DIGNIIN REPORT FAUX
+                          INVALID DOCUMENT â€¢ DIGNIIN REPORT FAUX
                         </div>
                       </motion.div>
                     )}
@@ -1179,7 +1194,7 @@ export default function App() {
                       <div>
                         <div className="lab-name">MEDILAB DIEGNOSTIC</div>
                         <div className="lab-address">Address: AdenAdde InternationalAirport,NextTo Dahabshiil Bank, Waberi, Mogadishu-Somalia</div>
-                        <div className="lab-tel">Tel: +252 613523011 • Email: m.labsdiagnostic@gmail.com</div>
+                        <div className="lab-tel">Tel: +252 613523011 â€¢ Email: m.labsdiagnostic@gmail.com</div>
                       </div>
                     </div>
                     <div className="meta-info">
@@ -1192,7 +1207,7 @@ export default function App() {
                   {/* DYNAMIC INTEGRITY ALERT WARNING */}
                   {!isCurrentlyVerified && (
                     <div style={{ marginBottom: "15px", padding: "10px", background: "#fdf2f2", borderLeft: "4px solid #f05252", borderRadius: "4px", color: "#9b1c1c", fontSize: "12px", textAlign: "left" }}>
-                      <strong style={{ display: "block", textTransform: "uppercase", marginBottom: "2px" }}>⚠️ INVALID DOCUMENT / SYSTEM COUBNTERFEIT WARNING</strong>
+                      <strong style={{ display: "block", textTransform: "uppercase", marginBottom: "2px" }}>âš ï¸ INVALID DOCUMENT / SYSTEM COUBNTERFEIT WARNING</strong>
                       This report has been marked as suspended or simulated and does not match central health registry logs.
                     </div>
                   )}
@@ -1372,7 +1387,7 @@ export default function App() {
                     <div className="w-[70%] h-[3px] bg-[#1b9bc5] mx-auto mb-2.5 rounded"></div>
                     <div className="text-slate-700 text-xs md:text-sm leading-relaxed font-normal">
                       <strong>Address:</strong> Aden Adde International Airport, Next To Dahabshiil Bank, Waberi, Mogadishu-Somalia<br />
-                      <strong>Tel:</strong> +252 613523011 &nbsp;&nbsp;•&nbsp;&nbsp; <strong>Email:</strong> m.labsdiagnostic@gmail.com
+                      <strong>Tel:</strong> +252 613523011 &nbsp;&nbsp;â€¢&nbsp;&nbsp; <strong>Email:</strong> m.labsdiagnostic@gmail.com
                     </div>
                   </div>
                   <img 
@@ -1386,10 +1401,10 @@ export default function App() {
                 {/* Patient verification card */}
                 <div className="bg-[#f7f7f7] rounded-xl border-l-[5px] border-[#3cb54a] p-6 shadow-sm flex flex-col gap-4">
                   <div className="text-[#3d7f36] text-lg md:text-xl font-bold flex items-center gap-2">
-                    <span>✅ Patient waa sax wuxuuna ka yimid Medilab Diagnostic System</span>
+                    <span>âœ… Patient waa sax wuxuuna ka yimid Medilab Diagnostic System</span>
                   </div>
                   <div className="text-[#555] text-sm font-semibold border-b border-slate-200/50 pb-2">
-                    ✔ This report is authentic and verified by Medilab Diagnostic.
+                    âœ” This report is authentic and verified by Medilab Diagnostic.
                   </div>
                   <div className="text-slate-800 text-sm md:text-base leading-loose grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                     <div>
@@ -1573,7 +1588,7 @@ export default function App() {
 
                 {/* Footer Section */}
                 <div className="border-t-[3px] border-[#1b84d6] pt-4 pb-2 text-center text-xs text-slate-500 font-semibold leading-relaxed">
-                  © 2026 Medilab Diagnostic Center — All rights reserved.<br />
+                  Â© 2026 Medilab Diagnostic Center â€” All rights reserved.<br />
                   Designed & Verified by Daryeel Tech IT Team
                 </div>
 
@@ -1620,7 +1635,7 @@ export default function App() {
       {/* FOOTER ADVISORY BANNER - NO-PRINT */}
       <footer style={{ backgroundColor: '#f4f5f2' }} className="no-print mt-auto border-t border-slate-300 py-4 text-center text-xs text-slate-700">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p>© 2026 Lab Verification Center. Designed & Verified by Tech IT Team.</p>
+          <p>Â© 2026 Lab Verification Center. Designed & Verified by Tech IT Team.</p>
         </div>
       </footer>
 
@@ -2184,4 +2199,4 @@ export default function App() {
 
     </div>
   );
-}
+                                                        }
