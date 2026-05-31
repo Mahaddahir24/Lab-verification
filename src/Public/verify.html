@@ -7,7 +7,7 @@
 
   <style>
     *{ margin:0; padding:0; box-sizing:border-box; font-family: Arial, Helvetica, sans-serif; }
-    body{ background:#dfe1e6; padding:12px; }
+    body{ background:#dfe1e6; padding:12px; display: none !important; }
     .container{ width:100%; max-width:1000px; margin: 0 auto; }
     .header{ background:linear-gradient(90deg, #eaf2fd 0%, #ffffff 100%); border-top:none; border-radius:8px; padding:18px 20px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
     
@@ -77,7 +77,7 @@
     </table>
 
     <div class="footer-line">
-      © 2026 Medilab Diagnostic Center - All rights reserved.<br>
+      © 2026 Medilab Diagnostic Center — All rights reserved.<br>
       Designed & Verified by Daryeel Tech IT Team
     </div>
   </div>
@@ -107,8 +107,21 @@
         const paramName = fieldMapping[id];
         const paramVal = params.get(paramName);
         if (paramVal && paramVal !== "undefined" && paramVal !== "null") {
-          el.innerText = decodeURIComponent(paramVal);
+          el.innerHTML = decodeURIComponent(paramVal);
+        } else {
+          // Fallback to localStorage if any saved data
+          const savedData = localStorage.getItem('patient_field_' + id);
+          if (savedData) {
+            el.innerHTML = savedData;
+          } else if (id.startsWith('val-')) {
+            el.innerHTML = "Negative";
+          }
         }
+
+        // Save on input so manual user edits persist locally as requested
+        el.addEventListener('input', () => {
+          localStorage.setItem('patient_field_' + id, el.innerHTML);
+        });
       }
     });
   </script>
